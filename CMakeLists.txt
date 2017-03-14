@@ -3,13 +3,23 @@ project(lms1xx)
 
 # Build ROS-independent library. 
 find_package(console_bridge REQUIRED tf)
+
 include_directories(include ${console_bridge_INCLUDE_DIRS})
 add_library(LMS1xx src/LMS1xx.cpp)
 target_link_libraries(LMS1xx ${console_bridge_LIBRARIES})
 
 # Regular catkin package follows. 
-find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs tf)
-catkin_package(CATKIN_DEPENDS roscpp)
+find_package(catkin REQUIRED COMPONENTS roscpp sensor_msgs tf  message_generation)
+add_message_files(
+  DIRECTORY msg
+  FILES
+  TiltScan.msg
+)
+generate_messages(
+   DEPENDENCIES
+   sensor_msgs
+)
+catkin_package(CATKIN_DEPENDS message_runtime roscpp )
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 add_executable(LMS1xx_node src/LMS1xx_node.cpp)

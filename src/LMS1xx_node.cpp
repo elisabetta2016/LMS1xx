@@ -6,6 +6,7 @@
 #include "sensor_msgs/LaserScan.h"
 #include <string>
 #include <stdlib.h>
+#include <lms1xx/TiltScan.h>
 #define DEG2RAD M_PI/180.0
 
 int main(int argc, char **argv)
@@ -22,13 +23,14 @@ int main(int argc, char **argv)
   // parameters
   std::string host;
   std::string frame_id;
+  lms1xx::TiltScan TiltScanMsg;
 
   ros::init(argc, argv, "lms1xx");
   ros::NodeHandle nh;
   ros::NodeHandle n("~");
   ros::Publisher scan_pub = nh.advertise<sensor_msgs::LaserScan>("scan", 1);
   ros::Publisher scan_pub2 = nh.advertise<geometry_msgs::Vector3>("scanner_data", 1);
-
+  ros::Publisher scan_tilt_pub =  nh.advertise<lms1xx::TiltScan>("Tilt_scan",1);
   n.param<std::string>("host", host, "192.168.0.1");
   n.param<std::string>("frame_id", frame_id, "base_laser");
 
@@ -151,7 +153,9 @@ int main(int argc, char **argv)
         scanpose.y = (strtol (data.speed, NULL, 16));
         scanpose.z = current_time.toSec();
         scan_pub2.publish(scanpose);
-
+        TiltScanMsg.ang = (int) scanpose.x;
+        TiltScanMsg.bim = scan_msg;
+        scan_tilt_pub.publish(TiltScanMsg);
         ros::spinOnce();
       }
 
